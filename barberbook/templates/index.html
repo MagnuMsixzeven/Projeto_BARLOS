@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BarberBook PRO - Dashboard Barbearia</title>
+  <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">BarberBook PRO</div>
+    <nav>
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Agendamentos</a>
+      <a href="#">Contratos</a>
+      <a href="#">Relatórios</a>
+      <a href="#">Clientes</a>
+      <a href="#">Serviços</a>
+      <a href="#">Barbeiros</a>
+      <a href="#">Financeiro</a>
+      <a href="#">Configurações</a>
+      <a href="#">Sair</a>
+    </nav>
+  </div>
+  <div class="main">
+    <header>
+      <div class="header-title">Dashboard</div>
+      <div class="mensalidade">
+        <span>Mensalidade expira em</span>
+        <span id="mensalidade-timer">12d 04h 32min</span>
+      </div>
+    </header>
+    <section class="cards">
+      <div class="card blue">
+        <div class="card-title">Agendamentos Hoje</div>
+        <div class="card-value">4</div>
+      </div>
+      <div class="card green">
+        <div class="card-title">Clientes Ativos</div>
+        <div class="card-value">15</div>
+      </div>
+      <div class="card purple">
+        <div class="card-title">Barbeiros</div>
+        <div class="card-value">2</div>
+      </div>
+      <div class="card yellow">
+        <div class="card-title">Serviços</div>
+        <div class="card-value">4</div>
+      </div>
+    </section>
+    <section class="agenda">
+      <h2>Agenda</h2>
+      <div class="agenda-header">
+        <button>&lt;</button>
+        <span>8 de julho de 2025</span>
+        <button>&gt;</button>
+      </div>
+      <div class="agenda-days">
+        <div>DOM</div><div>SEG</div><div>TER</div><div>QUA</div><div>QUI</div><div>SEX</div><div>SÁB</div>
+      </div>
+      <div class="agenda-slots">
+        <div class="slot livre">18:00 - 19:00 <span>Todos barbeiros</span></div>
+        <div class="slot ocupado">19:00 - 20:00 <span>Barbeiro: João</span></div>
+      </div>
+      <button class="novo-agendamento">+ Novo Agendamento</button>
+    </section>
+    <section class="contratos">
+      <h2>Contratos</h2>
+      <button class="adicionar-contrato">Adicionar Contrato</button>
+      <ul class="contrato-lista">
+        <li>Contrato 01 - <a href="#">Visualizar</a></li>
+        <li>Contrato 02 - <a href="#">Visualizar</a></li>
+      </ul>
+    </section>
+    <section class="relatorios">
+      <h2>Relatórios</h2>
+      <div class="relatorio-cards">
+        <div class="relatorio-card">Faturamento: <strong>R$ 2.500,00</strong></div>
+        <div class="relatorio-card">Clientes no mês: <strong>32</strong></div>
+        <div class="relatorio-card">Serviços realizados: <strong>54</strong></div>
+      </div>
+    </section>
+    <section class="instagram-feed">
+      <h2>Instagram</h2>
+      <div id="instagram-grid" class="instagram-grid"></div>
+    </section>
+  </div>
+  <script src="../static/js/script.js"></script>
+</body>
+</html>

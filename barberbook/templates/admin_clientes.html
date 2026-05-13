@@ -1,0 +1,104 @@
+{% extends 'base_admin.html' %}
+{% block title %}Clientes · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-users" style="color:var(--bb-primary);margin-right:8px"></i>Clientes{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+        <h1 style="font-size:1.3rem;font-weight:800">Clientes</h1>
+        <p style="color:var(--bb-text-sec);font-size:.88rem">Total: <strong>{{ clientes|length }}</strong> cadastrados</p>
+    </div>
+    <button onclick="document.getElementById('modalCliente').style.display='flex'" class="adm-btn primary">
+        <i class="fa-solid fa-user-plus"></i> Novo Cliente
+    </button>
+</div>
+
+<!-- Busca -->
+<div class="adm-filters" style="border-radius:16px 16px 0 0;border:1px solid var(--bb-border);border-bottom:none;background:var(--bb-bg-card)">
+    <input type="text" id="buscaCliente" oninput="filtrarClientes()" placeholder="Buscar por nome ou telefone…" style="flex:1;max-width:360px">
+</div>
+
+<div class="adm-card" style="border-radius:0 0 16px 16px;margin-top:0">
+    <div class="adm-table-wrap">
+        <table class="adm-table" id="tabelaClientes">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th>Cadastro</th>
+                    <th>Visitas</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for c in clientes %}
+            <tr>
+                <td>
+                    <div class="adm-name-cell">
+                        <div class="adm-mini-avatar">{{ c.nome[0]|upper }}</div>
+                        <div>
+                            <div style="font-weight:600">{{ c.nome }}</div>
+                            <div style="font-size:.75rem;color:var(--bb-text-sec)">{{ c.bairro or '' }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ c.telefone }}</td>
+                <td>{{ c.email or '—' }}</td>
+                <td style="color:var(--bb-text-sec);font-size:.85rem">{{ c.criado_em }}</td>
+                <td><span class="adm-badge bg-primary">{{ c.visitas }}</span></td>
+                <td>
+                    <div class="adm-actions">
+                        <a href="{{ url_for('historico_cliente', id=c.id) }}" class="adm-btn-icon primary" title="Histórico"><i class="fa-solid fa-clock-rotate-left"></i></a>
+                        <a href="{{ url_for('editar_cliente', id=c.id) }}" class="adm-btn-icon primary" title="Editar"><i class="fa-solid fa-pen"></i></a>
+                        <form method="POST" action="{{ url_for('deletar_cliente', id=c.id) }}" style="display:inline" onsubmit="return confirm('Excluir cliente?')">
+                            <button type="submit" class="adm-btn-icon danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--bb-text-sec)">
+                <i class="fa-solid fa-users-slash" style="font-size:2rem;display:block;margin-bottom:10px;opacity:.3"></i>
+                Nenhum cliente cadastrado
+            </td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal novo cliente -->
+<div class="adm-modal-overlay" id="modalCliente" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+    <div class="adm-modal">
+        <div class="adm-modal-header">
+            <h3><i class="fa-solid fa-user-plus"></i> Novo Cliente</h3>
+            <button class="adm-modal-close" onclick="document.getElementById('modalCliente').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form method="POST" action="{{ url_for('novo_cliente') }}">
+        <div class="adm-modal-body">
+            <div class="adm-form-row">
+                <div class="adm-form-group"><label>Nome *</label><input type="text" name="nome" required placeholder="Nome completo"></div>
+                <div class="adm-form-group"><label>Telefone *</label><input type="tel" name="telefone" required maxlength="15" inputmode="numeric" placeholder="(11) 99999-9999"></div>
+                <div class="adm-form-group"><label>E-mail</label><input type="email" name="email" maxlength="120" placeholder="nome@gmail.com ou nome@hotmail.com"></div>
+                <div class="adm-form-group"><label>Bairro</label><input type="text" name="bairro" placeholder="Bairro (opcional)"></div>
+            </div>
+        </div>
+        <div class="adm-modal-footer">
+            <button type="button" class="adm-btn ghost" onclick="document.getElementById('modalCliente').style.display='none'">Cancelar</button>
+            <button type="submit" class="adm-btn primary"><i class="fa-solid fa-check"></i> Salvar</button>
+        </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function filtrarClientes() {
+    const q = document.getElementById('buscaCliente').value.toLowerCase();
+    document.querySelectorAll('#tabelaClientes tbody tr').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

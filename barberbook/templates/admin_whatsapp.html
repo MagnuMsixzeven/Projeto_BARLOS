@@ -1,0 +1,89 @@
+{% extends 'base_admin.html' %}
+{% block title %}WhatsApp · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-brands fa-whatsapp" style="color:var(--bb-primary);margin-right:8px"></i>WhatsApp{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+    <div>
+        <h1 style="font-size:1.3rem;font-weight:800">Central do WhatsApp</h1>
+        <p style="color:var(--bb-text-sec);font-size:.88rem">Mensagens recebidas, notificações e pedidos de agendamento pelo WhatsApp.</p>
+    </div>
+    <form method="POST" action="{{ url_for('whatsapp_marcar_lidas') }}">
+        <button type="submit" class="adm-btn ghost"><i class="fa-solid fa-check-double"></i> Marcar tudo como lido</button>
+    </form>
+</div>
+
+<div class="adm-card">
+    <div class="adm-card-header"><h2><i class="fa-solid fa-link"></i> Integração com o site</h2></div>
+    <div style="padding:22px;display:grid;gap:14px">
+        <div style="padding:14px 16px;border-radius:12px;background:rgba(255,107,0,.08);border:1px solid rgba(255,107,0,.18);color:var(--bb-text-sec)">
+            <strong style="display:block;color:var(--bb-text);margin-bottom:4px">Webhook pronto</strong>
+            Configure esse endereço na Meta Cloud API ou no Twilio para receber mensagens no painel e gerar solicitações automáticas.
+        </div>
+        <div class="adm-form-group">
+            <label>Webhook URL</label>
+            <input type="text" value="{{ webhook_url }}" readonly>
+        </div>
+        <div style="font-size:.83rem;color:var(--bb-text-sec)">
+            Exemplo de mensagem do cliente: <strong style="color:var(--bb-text)">"Quero corte com João amanhã às 14:00"</strong>.
+            O sistema tenta identificar <strong>data</strong>, <strong>hora</strong>, <strong>barbeiro</strong> e <strong>tipo de corte</strong> automaticamente.
+        </div>
+    </div>
+</div>
+
+{% if pendencias %}
+<div class="adm-card">
+    <div class="adm-card-header"><h2><i class="fa-solid fa-calendar-plus"></i> Solicitações vindas do WhatsApp</h2></div>
+    <div class="adm-table-wrap">
+        <table class="adm-table">
+            <thead>
+                <tr><th>#</th><th>Cliente</th><th>Serviço</th><th>Barbeiro</th><th>Data</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+            {% for a in pendencias %}
+                <tr>
+                    <td>#{{ a.id }}</td>
+                    <td>{{ a.cliente }}</td>
+                    <td>{{ a.servico }}</td>
+                    <td>{{ a.barbeiro }}</td>
+                    <td>{{ a.data }} às {{ a.hora }}</td>
+                    <td><span class="adm-badge bg-primary">{{ a.status }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="adm-card">
+    <div class="adm-card-header"><h2><i class="fa-brands fa-whatsapp"></i> Mensagens recebidas</h2></div>
+    {% for m in mensagens %}
+    <div class="bb-contrato-item" style="align-items:flex-start">
+        <div class="bb-contrato-icon" style="background:rgba(34,197,94,.12);color:#22c55e"><i class="fa-brands fa-whatsapp"></i></div>
+        <div class="bb-contrato-info">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+                <div class="bb-contrato-nome">{{ m.nome or 'Cliente' }}</div>
+                <span style="font-size:.78rem;color:var(--bb-text-sec)">{{ m.telefone }}</span>
+                {% if not m.lida %}<span class="adm-badge bg-primary">Nova</span>{% endif %}
+                {% if m.agendamento_id %}<span class="adm-badge bg-success">Agendado #{{ m.agendamento_id }}</span>{% endif %}
+            </div>
+            <div style="font-size:.92rem;color:var(--bb-text);line-height:1.5">{{ m.mensagem }}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+                {% if m.data_solicitada %}<span class="adm-badge bg-primary"><i class="fa-regular fa-calendar"></i> {{ m.data_solicitada }}</span>{% endif %}
+                {% if m.hora_solicitada %}<span class="adm-badge bg-primary"><i class="fa-regular fa-clock"></i> {{ m.hora_solicitada }}</span>{% endif %}
+                {% if m.barbeiro_solicitado %}<span class="adm-badge bg-muted"><i class="fa-solid fa-user"></i> {{ m.barbeiro_solicitado }}</span>{% endif %}
+                {% if m.servico_solicitado %}<span class="adm-badge bg-muted"><i class="fa-solid fa-scissors"></i> {{ m.servico_solicitado }}</span>{% endif %}
+                {% if m.status_parse %}<span class="adm-badge bg-warn">{{ m.status_parse }}</span>{% endif %}
+            </div>
+        </div>
+        <div style="min-width:140px;text-align:right;font-size:.76rem;color:var(--bb-text-sec)">{{ m.criado_em }}</div>
+    </div>
+    {% else %}
+    <div style="padding:40px;text-align:center;color:var(--bb-text-sec)">
+        <i class="fa-brands fa-whatsapp" style="font-size:2.6rem;opacity:.25;display:block;margin-bottom:10px"></i>
+        Nenhuma mensagem recebida ainda.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

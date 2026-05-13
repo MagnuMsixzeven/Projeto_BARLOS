@@ -1,0 +1,78 @@
+{% extends 'base_admin.html' %}
+{% block title %}Barbeiros · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-person-scissors" style="color:var(--bb-primary);margin-right:8px"></i>Barbeiros{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+        <h1 style="font-size:1.3rem;font-weight:800">Equipe de Barbeiros</h1>
+        <p style="color:var(--bb-text-sec);font-size:.88rem">{{ barbeiros|length }} profissionais cadastrados</p>
+    </div>
+    <button onclick="document.getElementById('modalBarbeiro').style.display='flex'" class="adm-btn primary">
+        <i class="fa-solid fa-user-plus"></i> Novo Barbeiro
+    </button>
+</div>
+
+<div class="adm-grid-3" style="margin-bottom:0">
+    {% for b in barbeiros %}
+    <div class="adm-card" style="margin-bottom:0">
+        <div style="padding:24px;text-align:center">
+            <div class="adm-user-avatar" style="width:64px;height:64px;border-radius:18px;font-size:1.3rem;margin:0 auto 14px">{{ b.nome[0]|upper }}</div>
+            <div style="font-size:1.05rem;font-weight:700">{{ b.nome }}</div>
+            <div style="font-size:.82rem;color:var(--bb-text-sec);margin:4px 0 12px">{{ b.especialidade or 'Barbeiro' }}</div>
+            <span class="adm-badge {% if b.ativo %}bg-success{% else %}bg-muted{% endif %}" style="margin-bottom:14px;display:inline-flex">
+                {{ 'Ativo' if b.ativo else 'Inativo' }}
+            </span>
+            <div style="display:flex;gap:8px;justify-content:center;border-top:1px solid var(--bb-border);padding-top:14px">
+                <a href="{{ url_for('editar_barbeiro', id=b.id) }}" class="adm-btn ghost" style="padding:7px 14px;font-size:.82rem">
+                    <i class="fa-solid fa-pen"></i> Editar
+                </a>
+                <form method="POST" action="{{ url_for('deletar_barbeiro', id=b.id) }}" onsubmit="return confirm('Remover barbeiro?')">
+                    <button type="submit" class="adm-btn danger" style="padding:7px 14px;font-size:.82rem">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div style="padding:0 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:var(--bb-bg-muted);border-radius:10px;padding:12px;text-align:center">
+                <div style="font-size:1.3rem;font-weight:800;color:var(--bb-primary)">{{ b.agendamentos_mes }}</div>
+                <div style="font-size:.72rem;color:var(--bb-text-sec)">agend./mês</div>
+            </div>
+            <div style="background:var(--bb-bg-muted);border-radius:10px;padding:12px;text-align:center">
+                <div style="font-size:1.3rem;font-weight:800;color:var(--bb-success)">R$ {{ b.receita_mes }}</div>
+                <div style="font-size:.72rem;color:var(--bb-text-sec)">receita/mês</div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--bb-text-sec)">Nenhum barbeiro cadastrado</div>
+    {% endfor %}
+</div>
+
+<!-- Modal novo barbeiro -->
+<div class="adm-modal-overlay" id="modalBarbeiro" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+    <div class="adm-modal">
+        <div class="adm-modal-header">
+            <h3><i class="fa-solid fa-user-plus"></i> Novo Barbeiro</h3>
+            <button class="adm-modal-close" onclick="document.getElementById('modalBarbeiro').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form method="POST" action="{{ url_for('novo_barbeiro') }}">
+        <div class="adm-modal-body">
+            <div class="adm-form-row">
+                <div class="adm-form-group"><label>Nome *</label><input type="text" name="nome" required placeholder="Nome completo"></div>
+                <div class="adm-form-group"><label>Telefone</label><input type="tel" name="telefone" placeholder="(99) 9 9999-9999"></div>
+                <div class="adm-form-group"><label>Especialidade</label><input type="text" name="especialidade" placeholder="Ex: Corte masculino"></div>
+                <div class="adm-form-group"><label>Login (usuário)</label><input type="text" name="usuario" placeholder="barbeiro1"></div>
+                <div class="adm-form-group"><label>Senha</label><input type="password" name="senha" placeholder="Senha de acesso"></div>
+                <div class="adm-form-group"><label>Status</label><select name="ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
+            </div>
+        </div>
+        <div class="adm-modal-footer">
+            <button type="button" class="adm-btn ghost" onclick="document.getElementById('modalBarbeiro').style.display='none'">Cancelar</button>
+            <button type="submit" class="adm-btn primary"><i class="fa-solid fa-check"></i> Salvar</button>
+        </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base_admin.html' %}
+{% block title %}Agendamentos · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-calendar-check" style="color:var(--bb-primary);margin-right:8px"></i>Agendamentos{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+        <h1 style="font-size:1.3rem;font-weight:800">Agendamentos</h1>
+        <p style="color:var(--bb-text-sec);font-size:.88rem">Total: <strong>{{ total }}</strong> registros</p>
+    </div>
+    <a href="{{ url_for('novo_agendamento') }}" class="adm-btn primary">
+        <i class="fa-solid fa-plus"></i> Novo Agendamento
+    </a>
+</div>
+
+<div class="adm-card">
+    <!-- Filtros -->
+    <div class="adm-filters">
+        <form method="GET" style="display:contents">
+            <input type="date" name="data" value="{{ filtro_data }}" title="Filtrar por data">
+            <select name="barbeiro">
+                <option value="">Todos os barbeiros</option>
+                {% for b in barbeiros_lista %}
+                <option value="{{ b.id }}" {% if filtro_barbeiro == b.id|string %}selected{% endif %}>{{ b.nome }}</option>
+                {% endfor %}
+            </select>
+            <select name="status">
+                <option value="">Todos os status</option>
+                <option value="Pendente" {% if filtro_status=='Pendente' %}selected{% endif %}>Pendente</option>
+                <option value="Confirmado" {% if filtro_status=='Confirmado' %}selected{% endif %}>Confirmado</option>
+                <option value="Concluido" {% if filtro_status=='Concluido' %}selected{% endif %}>Concluído</option>
+                <option value="Cancelado" {% if filtro_status=='Cancelado' %}selected{% endif %}>Cancelado</option>
+                <option value="Solicitado via WhatsApp" {% if filtro_status=='Solicitado via WhatsApp' %}selected{% endif %}>Solicitado via WhatsApp</option>
+            </select>
+            <button type="submit" class="adm-btn primary" style="padding:8px 16px">
+                <i class="fa-solid fa-filter"></i> Filtrar
+            </button>
+            <a href="{{ url_for('agendamentos') }}" class="adm-btn ghost" style="padding:8px 14px">Limpar</a>
+        </form>
+    </div>
+
+    <div class="adm-table-wrap">
+        <table class="adm-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Cliente</th>
+                    <th>Serviço</th>
+                    <th>Barbeiro</th>
+                    <th>Data/Hora</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for a in agendamentos %}
+            <tr>
+                <td style="color:var(--bb-text-sec);font-size:.8rem">#{{ a.id }}</td>
+                <td>
+                    <div class="adm-name-cell">
+                        <div class="adm-mini-avatar">{{ a.cliente[0]|upper }}</div>
+                        <div>
+                            <div style="font-weight:600">{{ a.cliente }}</div>
+                            <div style="font-size:.75rem;color:var(--bb-text-sec)">{{ a.telefone }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ a.servico }}</td>
+                <td>{{ a.barbeiro }}</td>
+                <td>
+                    <div style="font-weight:600">{{ a.data }}</div>
+                    <div style="font-size:.8rem;color:var(--bb-text-sec)">{{ a.hora }}</div>
+                </td>
+                <td style="font-weight:700;color:var(--bb-success)">R$ {{ a.valor }}</td>
+                <td>
+                    <span class="adm-badge {% if a.status in ['Confirmado','Concluido'] %}bg-success{% elif a.status=='Solicitado via WhatsApp' %}bg-primary{% elif a.status=='Pendente' %}bg-warn{% elif a.status=='Cancelado' %}bg-danger{% else %}bg-muted{% endif %}">
+                        {{ a.status }}
+                    </span>
+                </td>
+                <td>
+                    <div class="adm-actions">
+                        {% if a.whatsapp_link %}
+                        <a href="{{ a.whatsapp_link }}" target="_blank" class="adm-btn-icon" title="Avisar cliente no WhatsApp" style="background:rgba(34,197,94,.12);color:#22c55e"><i class="fa-brands fa-whatsapp"></i></a>
+                        {% endif %}
+                        <a href="{{ url_for('editar_agendamento', id=a.id) }}" class="adm-btn-icon primary" title="Editar"><i class="fa-solid fa-pen"></i></a>
+                        <form method="POST" action="{{ url_for('deletar_agendamento', id=a.id) }}" style="display:inline" onsubmit="return confirm('Excluir agendamento?')">
+                            <button type="submit" class="adm-btn-icon danger" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--bb-text-sec)">
+                <i class="fa-solid fa-calendar-xmark" style="font-size:2rem;display:block;margin-bottom:10px;opacity:.3"></i>
+                Nenhum agendamento encontrado
+            </td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends 'base_admin.html' %}
+{% block title %}Dashboard · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-gauge-high" style="color:var(--bb-primary);margin-right:8px"></i>Dashboard{% endblock %}
+
+{% block content %}
+<!-- Saudação -->
+<div style="margin-bottom:22px">
+    <h1 style="font-size:1.4rem;font-weight:800">Olá, {{ session.get('nome','').split(' ')[0] }}!</h1>
+    <p style="color:var(--bb-text-sec);font-size:.9rem">{{ agora }} · Barbearia <strong>{{ barbearia_nome }}</strong></p>
+</div>
+
+<!-- Mensalidade Banner -->
+<div class="bb-mensalidade">
+    <div class="bb-mensalidade-left">
+        <div class="bb-mensalidade-icon"><i class="fa-solid fa-crown"></i></div>
+        <div class="bb-mensalidade-text">
+            <strong>Assinatura BarberBook PRO</strong>
+            <small>Plano ativo · Próxima cobrança automática</small>
+        </div>
+    </div>
+    <div class="bb-mensalidade-right">
+        <div class="bb-mensalidade-timer" id="mensalidadeTimer">Carregando…</div>
+        <small id="dataVenc">Vence em {{ vencimento }}</small>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="adm-stats">
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-primary"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="adm-stat-num">{{ agendamentos_hoje }}</div>
+        <div class="adm-stat-label">Agendamentos Hoje</div>
+        <div class="adm-stat-sub">{{ agendamentos_pendentes }} pendentes</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-accent"><i class="fa-solid fa-calendar-days"></i></div>
+        <div class="adm-stat-num">{{ agendamentos_mes }}</div>
+        <div class="adm-stat-label">Agendamentos no Mês</div>
+        <div class="adm-stat-sub">Mês atual</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-success"><i class="fa-solid fa-users"></i></div>
+        <div class="adm-stat-num">{{ total_clientes }}</div>
+        <div class="adm-stat-label">Clientes Cadastrados</div>
+        <div class="adm-stat-sub">{{ novos_clientes }} novos este mês</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-warn"><i class="fa-solid fa-brazilian-real-sign"></i></div>
+        <div class="adm-stat-num">R$ {{ receita_mes }}</div>
+        <div class="adm-stat-label">Receita no Mês</div>
+        <div class="adm-stat-sub">{{ total_barbeiros }} barbeiros ativos</div>
+    </div>
+</div>
+
+<!-- Agenda + Ações Rápidas -->
+<div class="adm-grid-2" style="margin-bottom:0">
+    <!-- Agenda semanal -->
+    <div class="adm-card">
+        <div class="adm-card-header">
+            <h2><i class="fa-solid fa-calendar-week"></i> Agenda da Semana</h2>
+            <a href="{{ url_for('agendamentos') }}" class="adm-link">Ver tudo <i class="fa-solid fa-arrow-right fa-xs"></i></a>
+        </div>
+        <div style="padding:18px">
+            <div class="bb-semana" id="semana">
+                {% for d in semana %}
+                <div class="bb-dia-btn {% if d.hoje %}hoje{% endif %}" onclick="mostrarDia({{ d.idx }})">
+                    <div class="bb-dia-nome">{{ d.nome }}</div>
+                    <div class="bb-dia-num">{{ d.num }}</div>
+                    <div class="bb-dia-total">{{ d.total }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="bb-slots" id="slotsDia">
+                {% for ag in proximos %}
+                <div class="bb-slot ocupado">
+                    <span class="bb-slot-time">{{ ag.hora }}</span>
+                    <span class="bb-slot-cliente">{{ ag.cliente }}</span>
+                    <span class="bb-slot-servico">{{ ag.servico }}</span>
+                    <span class="adm-badge {% if ag.status == 'Confirmado' %}bg-success{% elif ag.status == 'Pendente' %}bg-warn{% else %}bg-muted{% endif %}">{{ ag.status }}</span>
+                </div>
+                {% else %}
+                <div style="text-align:center;padding:30px;color:var(--bb-text-sec)">
+                    <i class="fa-solid fa-calendar-xmark" style="font-size:2rem;opacity:.3;display:block;margin-bottom:10px"></i>
+                    Nenhum agendamento hoje
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações rápidas + Link agendamento -->
+    <div>
+        <div class="adm-card" style="margin-bottom:22px">
+            <div class="adm-card-header"><h2><i class="fa-solid fa-bolt"></i> Ações Rápidas</h2></div>
+            <div class="bb-quick-list">
+                <a href="{{ url_for('novo_agendamento') }}" class="bb-quick-item">
+                    <div class="bb-quick-icon st-primary"><i class="fa-solid fa-plus"></i></div>
+                    Novo Agendamento
+                </a>
+                <a href="{{ url_for('clientes') }}" class="bb-quick-item">
+                    <div class="bb-quick-icon st-success"><i class="fa-solid fa-user-plus"></i></div>
+                    Cadastrar Cliente
+                </a>
+                <a href="{{ url_for('relatorios') }}" class="bb-quick-item">
+                    <div class="bb-quick-icon st-accent"><i class="fa-solid fa-chart-bar"></i></div>
+                    Ver Relatórios
+                </a>
+                <a href="{{ url_for('financeiro') }}" class="bb-quick-item">
+                    <div class="bb-quick-icon st-warn"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    Financeiro
+                </a>
+            </div>
+        </div>
+
+        <!-- Link de agendamento -->
+        <div class="adm-card">
+            <div class="adm-card-header"><h2><i class="fa-solid fa-link"></i> Link de Agendamento</h2></div>
+            <div style="padding:18px">
+                <p style="font-size:.85rem;color:var(--bb-text-sec);margin-bottom:12px">Compartilhe este link com seus clientes:</p>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <input id="linkInput" value="{{ link_agendamento }}" readonly
+                        style="flex:1;padding:9px 14px;border-radius:9px;border:1.5px solid var(--bb-border);font-size:.82rem;background:var(--bb-bg-muted);color:var(--bb-text)">
+                    <button onclick="copiarLink()" class="adm-btn primary" style="padding:9px 16px;border:none">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feed Instagram + Contratos ativos -->
+<div class="adm-grid-2" style="margin-top:22px">
+    <div class="adm-card">
+        <div class="adm-card-header">
+            <h2><i class="fa-brands fa-instagram"></i> Feed Instagram</h2>
+            <a href="{{ configuracoes_insta }}" target="_blank" class="adm-link">@{{ insta_handle }} <i class="fa-solid fa-arrow-up-right-from-square fa-xs"></i></a>
+        </div>
+        <div class="bb-insta-grid">
+            {% for _ in range(8) %}
+            <div class="bb-insta-post">
+                <i class="fa-solid fa-scissors"></i>
+                <span>Corte + Barba</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if not session.get('demo_mode') %}
+    <div class="adm-card">
+        <div class="adm-card-header">
+            <h2><i class="fa-solid fa-file-contract"></i> Contratos Ativos</h2>
+            <a href="{{ url_for('contratos') }}" class="adm-link">Ver todos <i class="fa-solid fa-arrow-right fa-xs"></i></a>
+        </div>
+        {% for c in contratos %}
+        <div class="bb-contrato-item">
+            <div class="bb-contrato-icon"><i class="fa-solid fa-store"></i></div>
+            <div class="bb-contrato-info">
+                <div class="bb-contrato-nome">{{ c.nome }}</div>
+                <div class="bb-contrato-sub">Plano {{ c.plano }} · desde {{ c.inicio }}</div>
+            </div>
+            <span class="adm-badge {% if c.status == 'Ativo' %}bg-success{% elif c.status == 'A vencer' %}bg-warn{% else %}bg-danger{% endif %}">{{ c.status }}</span>
+        </div>
+        {% else %}
+        <div style="padding:30px;text-align:center;color:var(--bb-text-sec);font-size:.9rem">Nenhum contrato ativo</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Timer mensalidade
+(function() {
+    const venc = new Date("{{ vencimento_iso }}");
+    function atualizar() {
+        const diff = venc - new Date();
+        if(diff <= 0) { document.getElementById('mensalidadeTimer').textContent = 'Vencido!'; return; }
+        const d = Math.floor(diff/86400000);
+        const h = Math.floor((diff%86400000)/3600000);
+        const m = Math.floor((diff%3600000)/60000);
+        document.getElementById('mensalidadeTimer').textContent = d + 'd ' + String(h).padStart(2,'0') + 'h ' + String(m).padStart(2,'0') + 'm';
+    }
+    atualizar();
+    setInterval(atualizar, 30000);
+})();
+
+function copiarLink() {
+    const inp = document.getElementById('linkInput');
+    inp.select(); document.execCommand('copy');
+    const btn = inp.nextElementSibling;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+    btn.style.background = 'var(--bb-success)';
+    setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-copy"></i>'; btn.style.background = ''; }, 2000);
+}
+</script>
+{% endblock %}

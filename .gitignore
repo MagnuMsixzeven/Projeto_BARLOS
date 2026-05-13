@@ -1,0 +1,42 @@
+# Banco de dados SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Pastas ignoradas
+barberbook_GAS/
+Projeto_Assistencia_TC/
+barbearia/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+.env/
+
+# Variáveis de ambiente
+.env
+.env.local
+*.env
+
+# VS Code
+.vscode/
+
+# Sistema
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Logs
+*.log

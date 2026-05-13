@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Configurações · BarberBook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+:root{--bb-primary:#7c3aed;--bb-accent:#fbbf24;--bb-success:#10b981;--bb-danger:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',sans-serif;background:#f0f0f5;min-height:100vh;max-width:520px;margin:0 auto}
+a{text-decoration:none;color:inherit}
+
+/* HEADER */
+.bb-header{background:linear-gradient(135deg,#0f0a1e,#1e0a3c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.bb-hdr-back{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:.9rem;flex-shrink:0}
+.bb-hdr-back:hover{background:rgba(255,255,255,.15);color:#fff}
+.bb-header h1{font-size:1rem;font-weight:700;flex:1}
+.bb-header-logout{width:38px;height:38px;border-radius:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;color:#f87171;font-size:.85rem}
+.bb-header-logout:hover{background:rgba(239,68,68,.22)}
+
+/* MAIN */
+.bb-main{padding:20px 16px 40px}
+
+/* AVATAR SECTION */
+.bb-avatar-section{text-align:center;margin-bottom:24px}
+.bb-avatar-wrap{position:relative;display:inline-block}
+.bb-avatar{width:88px;height:88px;border-radius:24px;background:linear-gradient(135deg,var(--bb-primary),var(--bb-accent));display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#fff;overflow:hidden;margin:0 auto 10px}
+.bb-avatar img{width:100%;height:100%;object-fit:cover}
+.bb-avatar-label{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--bb-primary);cursor:pointer;padding:6px 14px;background:rgba(124,58,237,.08);border-radius:8px;border:1.5px solid rgba(124,58,237,.15)}
+.bb-avatar-label i{font-size:.8rem}
+.bb-avatar-input{display:none}
+.bb-avatar-name{font-size:1rem;font-weight:700;margin-bottom:2px}
+.bb-avatar-role{font-size:.78rem;color:#71717a}
+
+/* CARDS */
+.bb-card{background:#fff;border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid #e4e4e7}
+.bb-card-header{padding:14px 18px 10px;border-bottom:1px solid #f4f4f5;display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:700;color:#52525b;text-transform:uppercase;letter-spacing:.05em}
+.bb-card-header i{color:var(--bb-primary);font-size:.9rem}
+.bb-card-body{padding:16px 18px}
+
+/* FORM ELEMENTS */
+.bb-field{margin-bottom:14px}
+.bb-field label{display:block;font-size:.78rem;font-weight:600;color:#52525b;margin-bottom:5px}
+.bb-field input{width:100%;border:1.5px solid #e4e4e7;border-radius:10px;padding:11px 14px;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s;background:#fafafa;color:#18181b}
+.bb-field input:focus{border-color:var(--bb-primary);background:#fff}
+.bb-field .bb-hint{font-size:.73rem;color:#a1a1aa;margin-top:4px}
+
+/* DIVIDER */
+.bb-pwd-divider{display:flex;align-items:center;gap:10px;margin:14px 0}
+.bb-pwd-divider::before,.bb-pwd-divider::after{content:'';flex:1;height:1px;background:#e4e4e7}
+.bb-pwd-divider span{font-size:.72rem;font-weight:600;color:#a1a1aa;white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
+
+/* BUTTONS */
+.bb-btn-primary{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--bb-primary),#9d5af0);color:#fff;border:none;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
+.bb-btn-primary:hover{opacity:.9}
+.bb-btn-primary:active{transform:scale(.98)}
+.bb-btn-danger{width:100%;padding:12px;border-radius:12px;background:transparent;border:1.5px solid rgba(239,68,68,.2);color:var(--bb-danger);font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;transition:background .2s}
+.bb-btn-danger:hover{background:rgba(239,68,68,.05)}
+
+/* FLASH */
+.bb-flash{padding:12px 16px;border-radius:10px;font-size:.85rem;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.bb-flash.ok{background:rgba(16,185,129,.1);color:#047857;border:1px solid rgba(16,185,129,.2)}
+.bb-flash.err{background:rgba(239,68,68,.1);color:#b91c1c;border:1px solid rgba(239,68,68,.2)}
+
+/* PASSWORD TOGGLE */
+.bb-pw-wrap{position:relative}
+.bb-pw-wrap input{padding-right:44px}
+.bb-pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#a1a1aa;cursor:pointer;padding:4px;font-size:.9rem}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="bb-header">
+    <a href="{{ url_for('barbeiro_painel') }}" class="bb-hdr-back" title="Voltar">
+        <i class="fa-solid fa-chevron-left"></i>
+    </a>
+    <h1>Minhas Configurações</h1>
+    <a href="{{ url_for('logout') }}" class="bb-header-logout" title="Sair">
+        <i class="fa-solid fa-right-from-bracket"></i>
+    </a>
+</div>
+
+<!-- MAIN -->
+<div class="bb-main">
+
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+        {% for cat, msg in msgs %}
+        <div class="bb-flash {{ 'ok' if cat == 'success' else 'err' }}">
+            <i class="fa-solid {{ 'fa-circle-check' if cat == 'success' else 'fa-circle-exclamation' }}"></i>
+            {{ msg }}
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <!-- AVATAR -->
+        <div class="bb-avatar-section">
+            <div class="bb-avatar-wrap">
+                <div class="bb-avatar" id="avatarPreview">
+                    {% if u.foto %}
+                        <img src="{{ url_for('static', filename=u.foto) }}" id="avatarImg" alt="Foto">
+                    {% else %}
+                        <span id="avatarInitial">{{ b.nome[0]|upper }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <label class="bb-avatar-label" for="fotoInput">
+                <i class="fa-solid fa-camera"></i> Trocar foto
+            </label>
+            <input type="file" name="foto" id="fotoInput" class="bb-avatar-input" accept="image/*" onchange="previewFoto(this)">
+            <div style="margin-top:10px">
+                <div class="bb-avatar-name">{{ b.nome }}</div>
+                <div class="bb-avatar-role">{{ b.especialidade or 'Barbeiro' }}</div>
+            </div>
+        </div>
+
+        <!-- DADOS PESSOAIS -->
+        <div class="bb-card">
+            <div class="bb-card-header">
+                <i class="fa-solid fa-user"></i> Dados Pessoais
+            </div>
+            <div class="bb-card-body">
+                <div class="bb-field">
+                    <label>Nome de exibição</label>
+                    <input type="text" name="nome" value="{{ b.nome }}" required maxlength="80" placeholder="Seu nome completo">
+                </div>
+                <div class="bb-field">
+                    <label>Usuário (login)</label>
+                    <input type="text" name="usuario" value="{{ u.usuario }}" required maxlength="40" placeholder="usuario_sem_espacos" autocomplete="username">
+                    <div class="bb-hint">Usado para entrar no sistema. Sem espaços.</div>
+                </div>
+                <div class="bb-field">
+                    <label>E-mail</label>
+                    <input type="email" name="email" value="{{ b.email or '' }}" maxlength="120" placeholder="nome@gmail.com ou nome@hotmail.com">
+                </div>
+            </div>
+        </div>
+
+        <!-- SENHA -->
+        <div class="bb-card">
+            <div class="bb-card-header">
+                <i class="fa-solid fa-lock"></i> Alterar Senha
+            </div>
+            <div class="bb-card-body">
+                <p style="font-size:.8rem;color:#71717a;margin-bottom:12px">Deixe em branco para manter a senha atual.</p>
+                <div class="bb-field">
+                    <label>Senha atual</label>
+                    <div class="bb-pw-wrap">
+                        <input type="password" name="senha_atual" id="pwAtual" autocomplete="current-password" placeholder="••••••••">
+                        <button type="button" class="bb-pw-toggle" onclick="togglePw('pwAtual',this)"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="bb-pwd-divider"><span>nova senha</span></div>
+                <div class="bb-field">
+                    <label>Nova senha</label>
+                    <div class="bb-pw-wrap">
+                        <input type="password" name="nova_senha" id="pwNova" autocomplete="new-password" placeholder="mínimo 6 caracteres">
+                        <button type="button" class="bb-pw-toggle" onclick="togglePw('pwNova',this)"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="bb-field">
+                    <label>Confirmar nova senha</label>
+                    <div class="bb-pw-wrap">
+                        <input type="password" name="conf_senha" id="pwConf" autocomplete="new-password" placeholder="repita a nova senha">
+                        <button type="button" class="bb-pw-toggle" onclick="togglePw('pwConf',this)"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="bb-btn-primary">
+            <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+        </button>
+        <a href="{{ url_for('logout') }}">
+            <button type="button" class="bb-btn-danger">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair da conta
+            </button>
+        </a>
+    </form>
+</div>
+
+<script src="{{ url_for('static', filename='js/form-helpers.js') }}"></script>
+<script>
+function previewFoto(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const preview = document.getElementById('avatarPreview');
+        preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover" alt="Preview">`;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    btn.querySelector('i').className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+}
+</script>
+</body>
+</html>

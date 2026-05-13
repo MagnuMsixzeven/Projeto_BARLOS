@@ -1,0 +1,209 @@
+{% extends 'base_admin.html' %}
+{% block title %}Relatórios · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-chart-line" style="color:var(--bb-primary);margin-right:8px"></i>Relatórios{% endblock %}
+
+{% block content %}
+<style>
+.rel-chart-card{background:#fff;border-radius:var(--bb-radius);border:1px solid var(--bb-border);padding:22px;}
+.rel-chart-card h2{font-size:.85rem;font-weight:700;color:var(--bb-text-sec);text-transform:uppercase;letter-spacing:.05em;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.rel-chart-card h2 i{color:var(--bb-primary)}
+.chart-wrap{position:relative;width:100%;height:255px}
+.btn-excel{background:#16a34a;color:#fff;font-size:.85rem;font-weight:700;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-family:inherit;transition:background .2s;text-decoration:none}
+.btn-excel:hover{background:#15803d}
+.top-cli-table{width:100%;border-collapse:collapse;font-size:.83rem}
+.top-cli-table th{background:var(--bb-sidebar);color:rgba(255,255,255,.6);font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}
+.top-cli-table td{padding:10px 12px;border-bottom:1px solid var(--bb-border)}
+.top-cli-table tr:last-child td{border-bottom:none}
+.top-cli-table tr:hover td{background:#f9f9ff}
+.top-rank{width:22px;height:22px;border-radius:6px;background:var(--bb-primary);color:#fff;font-size:.7rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+.r1{background:linear-gradient(135deg,#f59e0b,#fbbf24)!important}
+.r2{background:linear-gradient(135deg,#9ca3af,#d1d5db)!important;color:#333!important}
+.r3{background:linear-gradient(135deg,#b45309,#d97706)!important}
+</style>
+
+<!-- Header + botão Excel -->
+<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:22px">
+    <div>
+        <h1 style="font-size:1.3rem;font-weight:800">Relatórios <span style="color:var(--bb-primary);font-size:.95rem;font-weight:600;margin-left:6px">{{ mes_atual }}</span></h1>
+        <p style="color:var(--bb-text-sec);font-size:.88rem">Análise de desempenho e indicadores do período</p>
+    </div>
+    <a href="{{ url_for('relatorios_exportar') }}" class="btn-excel">
+        <i class="fa-solid fa-file-excel"></i> Exportar Excel
+    </a>
+</div>
+
+<!-- Stats resumo -->
+<div class="adm-stats">
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-primary"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="adm-stat-num">{{ total_agendamentos }}</div>
+        <div class="adm-stat-label">Total de Agendamentos</div>
+        <div class="adm-stat-sub">Este mês</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-success"><i class="fa-solid fa-brazilian-real-sign"></i></div>
+        <div class="adm-stat-num">R$ {{ receita_total }}</div>
+        <div class="adm-stat-label">Receita Total</div>
+        <div class="adm-stat-sub">Este mês</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-accent"><i class="fa-solid fa-percent"></i></div>
+        <div class="adm-stat-num">{{ taxa_conclusao }}%</div>
+        <div class="adm-stat-label">Taxa de Conclusão</div>
+        <div class="adm-stat-sub">Agend. concluídos</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-warn"><i class="fa-solid fa-star"></i></div>
+        <div class="adm-stat-num">R$ {{ ticket_medio }}</div>
+        <div class="adm-stat-label">Ticket Médio</div>
+        <div class="adm-stat-sub">Por atendimento</div>
+    </div>
+</div>
+
+<!-- Linha 1: Pizza (receita por serviço) + Colunas (dias do mês) -->
+<div class="adm-grid-2" style="margin-bottom:0">
+    <div class="rel-chart-card">
+        <h2><i class="fa-solid fa-chart-pie"></i> Receita por Serviço</h2>
+        <div class="chart-wrap"><canvas id="chartPizza"></canvas></div>
+    </div>
+    <div class="rel-chart-card">
+        <h2><i class="fa-solid fa-chart-column"></i> Agendamentos por Dia do Mês</h2>
+        <div class="chart-wrap"><canvas id="chartDias"></canvas></div>
+    </div>
+</div>
+
+<!-- Linha 2: Serviços populares + Top clientes -->
+<div class="adm-grid-2" style="margin-top:20px;margin-bottom:0">
+    <!-- Serviços mais populares (barras) -->
+    <div class="adm-card">
+        <div class="adm-card-header"><h2><i class="fa-solid fa-trophy"></i> Serviços Mais Solicitados</h2></div>
+        {% for s in servicos_pop %}
+        <div class="bb-fin-row">
+            <span class="bb-fin-nome">{{ s.nome }}</span>
+            <span style="font-size:.8rem;color:var(--bb-text-sec);min-width:28px;text-align:right">{{ s.total }}x</span>
+            <div class="bb-fin-bar"><div class="bar-bg"><div class="bar-fill" style="width:{{ s.pct }}%"></div></div></div>
+            <span class="bb-fin-val">R$ {{ s.receita }}</span>
+        </div>
+        {% else %}
+        <div style="padding:30px;text-align:center;color:var(--bb-text-sec)">Sem dados este mês</div>
+        {% endfor %}
+    </div>
+
+    <!-- Top clientes -->
+    <div class="adm-card">
+        <div class="adm-card-header"><h2><i class="fa-solid fa-crown"></i> Clientes Mais Frequentes</h2></div>
+        <div style="overflow-x:auto">
+        <table class="top-cli-table">
+            <thead><tr><th>#</th><th>Cliente</th><th>Visitas</th><th>Total Gasto</th></tr></thead>
+            <tbody>
+            {% for c in top_clientes %}
+            <tr>
+                <td><span class="top-rank {% if loop.index==1 %}r1{% elif loop.index==2 %}r2{% elif loop.index==3 %}r3{% endif %}">{{ loop.index }}</span></td>
+                <td style="font-weight:600">{{ c.nome }}</td>
+                <td style="text-align:center;font-weight:700;color:var(--bb-primary)">{{ c.total }}</td>
+                <td style="font-weight:700;color:var(--bb-success)">R$ {{ c.gasto }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--bb-text-sec)">Sem dados</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+
+<!-- Histórico de agendamentos -->
+<div class="adm-card" style="margin-top:20px">
+    <div class="adm-card-header">
+        <h2><i class="fa-solid fa-clock-rotate-left"></i> Histórico de Agendamentos</h2>
+        <a href="{{ url_for('agendamentos') }}" class="adm-link">Ver todos <i class="fa-solid fa-arrow-right fa-xs"></i></a>
+    </div>
+    <div class="adm-table-wrap">
+        <table class="adm-table">
+            <thead><tr><th>Cliente</th><th>Serviço</th><th>Barbeiro</th><th>Data</th><th>Hora</th><th>Valor</th><th>Pagto</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for a in ultimos %}
+            <tr>
+                <td style="font-weight:600">{{ a.cliente }}</td>
+                <td>{{ a.servico }}</td>
+                <td>{{ a.barbeiro }}</td>
+                <td style="color:var(--bb-text-sec)">{{ a.data }}</td>
+                <td style="color:var(--bb-text-sec)">{{ a.hora }}</td>
+                <td style="font-weight:700;color:var(--bb-success)">R$ {{ a.valor }}</td>
+                <td style="color:var(--bb-text-sec);font-size:.8rem">{{ a.pagamento or '—' }}</td>
+                <td><span class="adm-badge {% if a.status=='Concluido' %}bg-success{% elif a.status=='Cancelado' %}bg-danger{% else %}bg-warn{% endif %}">{{ a.status }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--bb-text-sec)">Sem registros</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#71717a';
+
+const BB_COLORS = ['#7c3aed','#9d5af0','#fbbf24','#10b981','#f59e0b','#6366f1','#ec4899','#14b8a6','#f97316','#84cc16'];
+
+const svNomes   = {{ servicos_pop | map(attribute='nome')        | list | tojson }};
+const svReceita = {{ servicos_pop | map(attribute='receita_num') | list | tojson }};
+const diasLbl   = {{ dias_mes    | map(attribute='dia')          | list | tojson }};
+const diasVal   = {{ dias_mes    | map(attribute='total')        | list | tojson }};
+
+// ── Pizza ─────────────────────────────────────────────────────
+(function(){
+    const ctx = document.getElementById('chartPizza');
+    if (!ctx) return;
+    if (!svNomes.length) { ctx.closest('.chart-wrap').innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#a1a1aa;font-size:.88rem">Sem dados este mês</div>'; return; }
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: svNomes,
+            datasets: [{ data: svReceita, backgroundColor: BB_COLORS.slice(0, svNomes.length), borderWidth: 2, borderColor: '#fff', hoverOffset: 8 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '60%',
+            plugins: {
+                legend: { position: 'right', labels: { boxWidth: 12, padding: 14, font: { size: 11 } } },
+                tooltip: { callbacks: { label: c => { const t = c.dataset.data.reduce((a,b)=>a+b,0)||1; return ` R$ ${c.parsed.toFixed(2).replace('.',',')} (${Math.round(c.parsed/t*100)}%)`; } } }
+            }
+        }
+    });
+})();
+
+// ── Colunas ───────────────────────────────────────────────────
+(function(){
+    const ctx = document.getElementById('chartDias');
+    if (!ctx) return;
+    if (!diasLbl.length) { ctx.closest('.chart-wrap').innerHTML='<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#a1a1aa;font-size:.88rem">Sem dados este mês</div>'; return; }
+    const maxVal = Math.max(...diasVal);
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: diasLbl.map(d => 'Dia ' + String(d).padStart(2,'0')),
+            datasets: [{
+                label: 'Agendamentos',
+                data: diasVal,
+                backgroundColor: diasVal.map(v => v === maxVal ? '#fbbf24' : 'rgba(124,58,237,0.72)'),
+                borderRadius: 7, borderSkipped: false, maxBarThickness: 36
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.parsed.y} agendamento${c.parsed.y!==1?'s':''}` } }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: '#f4f4f5' } }
+            }
+        }
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'base_admin.html' %}
+{% block title %}Configurações · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-gear" style="color:var(--bb-primary);margin-right:8px"></i>Configurações{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:22px">
+    <h1 style="font-size:1.3rem;font-weight:800">Configurações</h1>
+    <p style="color:var(--bb-text-sec);font-size:.88rem">Personalize sua barbearia</p>
+</div>
+
+<div class="adm-grid-2">
+    <!-- Info da barbearia -->
+    <div class="adm-card">
+        <div class="adm-card-header"><h2><i class="fa-solid fa-store"></i> Dados da Barbearia</h2></div>
+        <div class="adm-modal-body">
+            <form method="POST" action="{{ url_for('salvar_config') }}">
+                <div class="adm-form-row">
+                    <div class="adm-form-group adm-form-full">
+                        <label>Nome da Barbearia</label>
+                        <input type="text" name="nome" value="{{ config.nome }}" required>
+                    </div>
+                    <div class="adm-form-group">
+                        <label>Telefone</label>
+                        <input type="tel" name="telefone" value="{{ config.telefone }}" maxlength="15" inputmode="numeric" placeholder="(11) 99999-9999">
+                    </div>
+                    <div class="adm-form-group">
+                        <label>E-mail</label>
+                        <input type="email" name="email" value="{{ config.email }}" maxlength="120" placeholder="nome@gmail.com ou nome@hotmail.com">
+                    </div>
+                    <div class="adm-form-group adm-form-full">
+                        <label>Endereço</label>
+                        <input type="text" name="endereco" value="{{ config.endereco }}">
+                    </div>
+                    <div class="adm-form-group">
+                        <label>Instagram (@handle)</label>
+                        <input type="text" name="instagram" value="{{ config.instagram }}" placeholder="minhabarbearia">
+                    </div>
+                    <div class="adm-form-group">
+                        <label>Link agendamento</label>
+                        <input type="text" name="link_agendamento" value="{{ config.link_agendamento }}">
+                    </div>
+                    <div class="adm-form-group">
+                        <label>Número WhatsApp (com DDI)</label>
+                        <input type="text" name="whatsapp_numero" value="{{ config.get('whatsapp_numero','') }}" placeholder="5511999999999">
+                    </div>
+                    <div class="adm-form-group">
+                        <label>WhatsApp Phone ID</label>
+                        <input type="text" name="whatsapp_phone_id" value="{{ config.get('whatsapp_phone_id','') }}" placeholder="ID da Meta Cloud API">
+                    </div>
+                    <div class="adm-form-group adm-form-full">
+                        <label>Token da API do WhatsApp</label>
+                        <input type="password" name="whatsapp_api_token" value="{{ config.get('whatsapp_api_token','') }}" placeholder="Cole aqui o token permanente da Meta">
+                    </div>
+                    <div class="adm-form-group">
+                        <label>Verify Token</label>
+                        <input type="text" name="whatsapp_verify_token" value="{{ config.get('whatsapp_verify_token','') }}">
+                    </div>
+                    <div class="adm-form-group adm-form-full">
+                        <label>Webhook URL</label>
+                        <input type="text" value="{{ request.url_root.rstrip('/') }}{{ url_for('whatsapp_webhook') }}" readonly>
+                    </div>
+                </div>
+                <div style="margin:10px 0 0;padding:12px 14px;border-radius:12px;background:rgba(255,107,0,.08);border:1px solid rgba(255,107,0,.18);color:var(--bb-text-sec);font-size:.82rem">
+                    Ao conectar a Meta/Twilio neste webhook, as mensagens recebidas no WhatsApp passam a gerar notificação no painel e podem virar agendamento automático.
+                </div>
+                <div style="margin-top:8px;text-align:right">
+                    <button type="submit" class="adm-btn primary"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Horário de funcionamento -->
+    <div class="adm-card">
+        <div class="adm-card-header"><h2><i class="fa-solid fa-clock"></i> Horários de Funcionamento</h2></div>
+        <div class="adm-modal-body">
+            <form method="POST" action="{{ url_for('salvar_horarios') }}">
+                {% for dia in dias_semana %}
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                    <div style="min-width:90px;font-size:.85rem;font-weight:600;color:var(--bb-text-sec)">{{ dia.nome }}</div>
+                    <input type="checkbox" name="ativo_{{ dia.key }}" {% if dia.ativo %}checked{% endif %} style="width:16px;height:16px">
+                    <input type="time" name="inicio_{{ dia.key }}" value="{{ dia.inicio }}" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--bb-border);font-size:.85rem;flex:1">
+                    <span style="color:var(--bb-text-sec)">–</span>
+                    <input type="time" name="fim_{{ dia.key }}" value="{{ dia.fim }}" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--bb-border);font-size:.85rem;flex:1">
+                </div>
+                {% endfor %}
+                <div style="margin-top:12px;text-align:right">
+                    <button type="submit" class="adm-btn primary"><i class="fa-solid fa-floppy-disk"></i> Salvar Horários</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Senha -->
+<div class="adm-card" style="max-width:480px">
+    <div class="adm-card-header"><h2><i class="fa-solid fa-lock"></i> Alterar Senha</h2></div>
+    <div class="adm-modal-body">
+        <form method="POST" action="{{ url_for('alterar_senha') }}">
+            <div class="adm-form-row">
+                <div class="adm-form-group adm-form-full"><label>Senha Atual</label><input type="password" name="senha_atual" required></div>
+                <div class="adm-form-group"><label>Nova Senha</label><input type="password" name="nova_senha" required></div>
+                <div class="adm-form-group"><label>Confirmar</label><input type="password" name="confirmar" required></div>
+            </div>
+            <div style="text-align:right;margin-top:4px">
+                <button type="submit" class="adm-btn primary"><i class="fa-solid fa-key"></i> Alterar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

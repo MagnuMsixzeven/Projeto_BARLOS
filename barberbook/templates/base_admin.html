@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BarberBook PRO{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="adm-sidebar" id="sidebar">
+    <!-- Brand -->
+    <div class="adm-sidebar-brand">
+        <div class="adm-logo-icon"><i class="fa-solid fa-scissors"></i></div>
+        <div class="adm-logo-text">Barber<b>Book</b> <small style="display:block;font-size:.65rem;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.04em">PRO</small></div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="adm-nav">
+        <div class="adm-nav-section">Principal</div>
+        <a href="{{ url_for('dashboard') }}" class="adm-nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <i class="fa-solid fa-gauge-high"></i> Dashboard
+        </a>
+        <a href="{{ url_for('agendamentos') }}" class="adm-nav-item {% if request.endpoint == 'agendamentos' %}active{% endif %}">
+            <i class="fa-solid fa-calendar-check"></i> Agendamentos
+        </a>
+        <a href="{{ url_for('clientes') }}" class="adm-nav-item {% if request.endpoint == 'clientes' %}active{% endif %}">
+            <i class="fa-solid fa-users"></i> Clientes
+        </a>
+
+        <div class="adm-nav-section">Gestão</div>
+        <a href="{{ url_for('servicos') }}" class="adm-nav-item {% if request.endpoint == 'servicos' %}active{% endif %}">
+            <i class="fa-solid fa-star"></i> Serviços
+        </a>
+        <a href="{{ url_for('barbeiros') }}" class="adm-nav-item {% if request.endpoint == 'barbeiros' %}active{% endif %}">
+            <i class="fa-solid fa-person-scissors"></i> Barbeiros
+        </a>
+        <a href="{{ url_for('financeiro') }}" class="adm-nav-item {% if request.endpoint == 'financeiro' %}active{% endif %}">
+            <i class="fa-solid fa-wallet"></i> Financeiro
+        </a>
+
+        <div class="adm-nav-section">Relatórios</div>
+        <a href="{{ url_for('relatorios') }}" class="adm-nav-item {% if request.endpoint == 'relatorios' %}active{% endif %}">
+            <i class="fa-solid fa-chart-line"></i> Relatórios
+        </a>
+        <a href="{{ url_for('contratos') }}" class="adm-nav-item {% if request.endpoint == 'contratos' %}active{% endif %}">
+            <i class="fa-solid fa-file-contract"></i> Contratos
+        </a>
+
+        <div class="adm-nav-section">Sistema</div>
+        <a href="{{ url_for('whatsapp_central') }}" class="adm-nav-item {% if request.endpoint == 'whatsapp_central' %}active{% endif %}">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </a>
+        <a href="{{ url_for('configuracoes') }}" class="adm-nav-item {% if request.endpoint == 'configuracoes' %}active{% endif %}">
+            <i class="fa-solid fa-gear"></i> Configurações
+        </a>
+        <a href="{{ url_for('logout') }}" class="adm-nav-item adm-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </a>
+    </nav>
+
+    <!-- User block -->
+    <div class="adm-user-block">
+        <div class="adm-user-avatar">{{ session.get('nome', 'U')[0]|upper }}</div>
+        <div class="adm-user-info">
+            <strong>{{ session.get('nome', 'Usuário') }}</strong>
+            <small>
+                {% set role = session.get('role', '') %}
+                {% if role == 'admin' %}Administrador
+                {% elif role == 'gerente' %}Gerente
+                {% elif role == 'barbeiro' %}Barbeiro
+                {% else %}{{ role }}{% endif %}
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay mobile -->
+<div class="adm-sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()" style="display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.5);backdrop-filter:blur(3px)"></div>
+
+<main class="adm-main">
+    <!-- Topbar -->
+    <header class="adm-topbar">
+        <button class="adm-menu-toggle" onclick="toggleSidebar()" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="adm-page-title">{% block page_title %}Dashboard{% endblock %}</span>
+        <div class="adm-topbar-right">
+            <a href="{{ url_for('whatsapp_central') }}" class="adm-notif-bell" title="Notificações do WhatsApp">
+                <i class="fa-solid fa-bell"></i>
+                <span class="adm-notif-badge" id="notifCount" {% if not wpp_unread_count %}style="display:none"{% endif %}>{{ wpp_unread_count }}</span>
+            </a>
+            <a href="{{ url_for('perfil') }}" style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:12px;border:1.5px solid var(--bb-border);font-size:.85rem;font-weight:600;color:var(--bb-text);transition:background .2s" onmouseover="this.style.background='var(--bb-bg-muted)'" onmouseout="this.style.background='transparent'">
+                <div class="adm-user-avatar" style="width:28px;height:28px;border-radius:8px;font-size:.75rem;font-weight:700">{{ session.get('nome', 'U')[0]|upper }}</div>
+                {{ session.get('nome', 'Usuário').split(' ')[0] }}
+            </a>
+        </div>
+    </header>
+
+    <!-- Alerts -->
+    <div style="padding: 0 30px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="adm-alert adm-alert-{{ category }}" style="margin-top:16px">
+                        <i class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'error' or category == 'danger' %}fa-circle-xmark{% elif category == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Content -->
+    <div class="adm-content">
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/form-helpers.js') }}"></script>
+<script>
+function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    sb.classList.toggle('open');
+    ov.style.display = sb.classList.contains('open') ? 'block' : 'none';
+}
+// Active nav link por URL
+(function(){
+    const l = window.location.pathname;
+    document.querySelectorAll('.adm-nav-item').forEach(a => {
+        if(a.getAttribute('href') === l) a.classList.add('active');
+    });
+})();
+
+(function(){
+    const badge = document.getElementById('notifCount');
+    if(!badge) return;
+    async function atualizarBadge(){
+        try {
+            const r = await fetch('{{ url_for("api_whatsapp_unread") }}');
+            const d = await r.json();
+            const total = Number(d.count || 0);
+            badge.textContent = total;
+            badge.style.display = total > 0 ? 'flex' : 'none';
+        } catch(e) {}
+    }
+    atualizarBadge();
+    setInterval(atualizarBadge, 20000);
+})();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

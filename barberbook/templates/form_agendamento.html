@@ -1,0 +1,68 @@
+{% extends 'base_admin.html' %}
+{% block title %}{{ 'Editar' if ag else 'Novo' }} Agendamento · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-calendar-plus" style="color:var(--bb-primary);margin-right:8px"></i>{{ 'Editar' if ag else 'Novo' }} Agendamento{% endblock %}
+
+{% block content %}
+<div class="adm-card" style="max-width:680px">
+    <div class="adm-card-header">
+        <h2><i class="fa-solid fa-calendar-plus"></i> {{ 'Editar' if ag else 'Novo' }} Agendamento</h2>
+    </div>
+    <div class="adm-modal-body">
+        <form method="POST">
+            <div class="adm-form-row">
+                <div class="adm-form-group">
+                    <label>Cliente *</label>
+                    <select name="cliente_id" required>
+                        <option value="">Selecione o cliente…</option>
+                        {% for c in clientes %}
+                        <option value="{{ c.id }}" {% if ag and ag.cliente_id==c.id %}selected{% endif %}>{{ c.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="adm-form-group">
+                    <label>Barbeiro *</label>
+                    <select name="barbeiro_id" required>
+                        <option value="">Selecione o barbeiro…</option>
+                        {% for b in barbeiros %}
+                        <option value="{{ b.id }}" {% if ag and ag.barbeiro_id==b.id %}selected{% endif %}>{{ b.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="adm-form-group">
+                    <label>Serviço *</label>
+                    <select name="servico_id" required>
+                        <option value="">Selecione o serviço…</option>
+                        {% for s in servicos %}
+                        <option value="{{ s.id }}" {% if ag and ag.servico_id==s.id %}selected{% endif %}>{{ s.nome }} – R$ {{ s.preco }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="adm-form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        {% for s in ['Pendente','Confirmado','Concluido','Cancelado'] %}
+                        <option value="{{ s }}" {% if ag and ag.status==s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="adm-form-group">
+                    <label>Data *</label>
+                    <input type="date" name="data" value="{{ ag.data if ag else '' }}" required>
+                </div>
+                <div class="adm-form-group">
+                    <label>Hora *</label>
+                    <input type="time" name="hora" value="{{ ag.hora if ag else '' }}" required>
+                </div>
+                <div class="adm-form-group adm-form-full">
+                    <label>Observação</label>
+                    <textarea name="obs" rows="2" placeholder="Observações opcionais…">{{ ag.obs if ag else '' }}</textarea>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+                <a href="{{ url_for('agendamentos') }}" class="adm-btn ghost">Cancelar</a>
+                <button type="submit" class="adm-btn primary"><i class="fa-solid fa-check"></i> Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

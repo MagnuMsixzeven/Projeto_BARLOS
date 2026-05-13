@@ -1,0 +1,115 @@
+{% extends 'base_admin.html' %}
+{% block title %}Financeiro · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-wallet" style="color:var(--bb-primary);margin-right:8px"></i>Financeiro{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:22px">
+    <h1 style="font-size:1.3rem;font-weight:800">Financeiro</h1>
+    <p style="color:var(--bb-text-sec);font-size:.88rem">Controle de receitas e assinatura</p>
+</div>
+
+<!-- Stats financeiros -->
+<div class="adm-stats">
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-success"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        <div class="adm-stat-num">R$ {{ receita_mes }}</div>
+        <div class="adm-stat-label">Receita Este Mês</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-primary"><i class="fa-solid fa-money-bill-wave"></i></div>
+        <div class="adm-stat-num">R$ {{ receita_semana }}</div>
+        <div class="adm-stat-label">Receita Esta Semana</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-accent"><i class="fa-solid fa-coins"></i></div>
+        <div class="adm-stat-num">R$ {{ receita_hoje }}</div>
+        <div class="adm-stat-label">Receita Hoje</div>
+    </div>
+    <div class="adm-stat-card">
+        <div class="adm-stat-icon st-warn"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="adm-stat-num">R$ 100,00</div>
+        <div class="adm-stat-label">Mensalidade Plataforma</div>
+        <div class="adm-stat-sub">Vence em {{ vencimento }}</div>
+    </div>
+</div>
+
+<div class="adm-grid-2">
+    <!-- Mensalidade status -->
+    <div class="adm-card">
+        <div class="adm-card-header"><h2><i class="fa-solid fa-crown"></i> Assinatura BarberBook PRO</h2></div>
+        <div style="padding:24px">
+            <div class="bb-mensalidade" style="margin-bottom:0">
+                <div class="bb-mensalidade-left">
+                    <div class="bb-mensalidade-icon"><i class="fa-solid fa-crown"></i></div>
+                    <div class="bb-mensalidade-text">
+                        <strong>Plano PRO Mensal</strong>
+                        <small>Setup: R$1.000 · Mensalidade: R$100/mês</small>
+                    </div>
+                </div>
+                <div class="bb-mensalidade-right">
+                    <div class="bb-mensalidade-timer" id="timerFin">—</div>
+                    <small>Vence: {{ vencimento }}</small>
+                </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px">
+                <a href="#" class="adm-btn accent"><i class="fa-solid fa-pix"></i> Pagar com Pix</a>
+                <a href="#" class="adm-btn ghost"><i class="fa-solid fa-credit-card"></i> Cartão</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formas de pagamento nos agend. -->
+    <div class="adm-card">
+        <div class="adm-card-header"><h2><i class="fa-solid fa-credit-card"></i> Pagamentos por Forma</h2></div>
+        {% for p in formas_pagamento %}
+        <div class="bb-fin-row">
+            <span class="bb-fin-nome">{{ p.forma }}</span>
+            <div class="bb-fin-bar">
+                <div class="bar-bg"><div class="bar-fill" style="width:{{ p.pct }}%"></div></div>
+            </div>
+            <span class="bb-fin-val">R$ {{ p.total }}</span>
+        </div>
+        {% else %}
+        <div style="padding:30px;text-align:center;color:var(--bb-text-sec)">Sem registros</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Histórico de receitas -->
+<div class="adm-card">
+    <div class="adm-card-header"><h2><i class="fa-solid fa-list-check"></i> Últimas Receitas</h2></div>
+    <div class="adm-table-wrap">
+        <table class="adm-table">
+            <thead><tr><th>Data</th><th>Cliente</th><th>Serviço</th><th>Barbeiro</th><th>Forma Pag.</th><th>Valor</th></tr></thead>
+            <tbody>
+            {% for r in receitas %}
+            <tr>
+                <td style="color:var(--bb-text-sec)">{{ r.data }}</td>
+                <td style="font-weight:600">{{ r.cliente }}</td>
+                <td>{{ r.servico }}</td>
+                <td>{{ r.barbeiro }}</td>
+                <td><span class="adm-badge bg-primary">{{ r.forma }}</span></td>
+                <td style="font-weight:700;color:var(--bb-success)">R$ {{ r.valor }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--bb-text-sec)">Sem receitas registradas</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function() {
+    const venc = new Date("{{ vencimento_iso }}");
+    function tick() {
+        const diff = venc - new Date();
+        if(diff <= 0) { document.getElementById('timerFin').textContent = 'Vencido!'; return; }
+        const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000);
+        document.getElementById('timerFin').textContent = d + 'd ' + String(h).padStart(2,'0') + 'h ' + String(m).padStart(2,'0') + 'm';
+    }
+    tick(); setInterval(tick, 30000);
+})();
+</script>
+{% endblock %}

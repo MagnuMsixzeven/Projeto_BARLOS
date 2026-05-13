@@ -1,0 +1,576 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Meu Painel  BarberBook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+:root{--bb-primary:#7c3aed;--bb-accent:#fbbf24;--bb-success:#10b981;--bb-danger:#ef4444;--bb-warn:#f59e0b}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',sans-serif;background:#f0f0f5;min-height:100vh;max-width:520px;margin:0 auto}
+a{text-decoration:none;color:inherit}
+/* HEADER */
+.bb-header{background:linear-gradient(135deg,#0f0a1e,#1e0a3c);color:#fff;padding:20px 20px 0;position:sticky;top:0;z-index:50}
+.bb-header-top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.bb-hdr-avatar{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--bb-primary),var(--bb-accent));display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden}
+.bb-hdr-avatar img{width:100%;height:100%;object-fit:cover}
+.bb-hdr-info{flex:1}
+.bb-hdr-info strong{display:block;font-size:.95rem;font-weight:700}
+.bb-hdr-info small{font-size:.75rem;color:rgba(255,255,255,.5)}
+.bb-hdr-cfg{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.6);font-size:.9rem}
+.bb-hdr-cfg:hover{background:rgba(255,255,255,.15);color:#fff}
+
+/* STATUS TOGGLE */
+.bb-status-btn{width:100%;padding:13px 18px;border-radius:14px;border:none;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .25s;margin-bottom:16px;letter-spacing:.01em}
+.bb-status-btn.disponivel{background:rgba(16,185,129,.15);color:#6ee7b7;border:1.5px solid rgba(16,185,129,.25)}
+.bb-status-btn.atendendo{background:linear-gradient(135deg,#d97706,#f59e0b);color:#1a0a00;border:1.5px solid #f59e0b;box-shadow:0 0 20px rgba(245,158,11,.3)}
+.bb-status-dot{width:10px;height:10px;border-radius:50%}
+.bb-status-btn.disponivel .bb-status-dot{background:#10b981}
+.bb-status-btn.atendendo .bb-status-dot{background:#1a0a00;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* TABS */
+.bb-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.08);margin:0 -20px}
+.bb-tab{flex:1;text-align:center;padding:11px 6px;font-size:.82rem;font-weight:600;color:rgba(255,255,255,.4);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.bb-tab.active{color:#fff;border-bottom-color:var(--bb-accent)}
+
+/* MAIN CONTENT */
+.bb-main{padding:16px}
+
+/* STATS STRIP */
+.bb-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.bb-strip-item{background:#fff;border-radius:12px;padding:12px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.bb-strip-num{font-size:1.25rem;font-weight:800;color:var(--bb-primary)}
+.bb-strip-lbl{font-size:.7rem;color:#71717a;margin-top:2px}
+
+/* EMPTY STATE */
+.bb-empty{text-align:center;padding:48px 20px;color:#a1a1aa}
+.bb-empty i{font-size:2.8rem;display:block;margin-bottom:12px;opacity:.3}
+.bb-empty p{font-size:.9rem}
+
+/* APPOINTMENT CARD */
+.bb-card{background:#fff;border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid #e4e4e7}
+.bb-card.status-concluido{border-left:4px solid var(--bb-success)}
+.bb-card.status-cancelado{border-left:4px solid var(--bb-danger);opacity:.65}
+.bb-card.status-confirmado{border-left:4px solid var(--bb-primary)}
+.bb-card.status-pendente{border-left:4px solid var(--bb-warn)}
+.bb-card-head{display:flex;align-items:center;gap:10px;padding:14px 16px 10px}
+.bb-card-hora{font-size:1.15rem;font-weight:800;color:var(--bb-primary);min-width:54px}
+.bb-card-data{font-size:.72rem;color:#a1a1aa;font-weight:500}
+.bb-card-cli{flex:1}
+.bb-card-cli strong{display:block;font-size:.9rem;font-weight:700}
+.bb-card-cli span{font-size:.78rem;color:#71717a}
+.bb-card-badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.badge-pendente{background:rgba(245,158,11,.1);color:#b45309}
+.badge-confirmado{background:rgba(124,58,237,.1);color:var(--bb-primary)}
+.badge-concluido{background:rgba(16,185,129,.1);color:#047857}
+.badge-cancelado{background:rgba(239,68,68,.1);color:#b91c1c}
+
+.bb-card-servico{display:flex;align-items:center;gap:8px;padding:0 16px 12px;font-size:.83rem}
+.bb-card-servico i{color:var(--bb-primary);font-size:.8rem}
+.bb-card-preco{margin-left:auto;font-weight:700;color:var(--bb-success)}
+.bb-card-tel{display:flex;align-items:center;gap:6px;padding:0 16px 12px;font-size:.8rem;color:#71717a}
+.bb-card-tel a{color:#25d366;font-weight:600}
+
+/* ACTION BUTTONS */
+.bb-card-actions{display:flex;gap:8px;padding:0 16px 14px}
+.bb-act-btn{flex:1;padding:10px;border-radius:10px;border:none;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
+.bb-act-btn.confirmar{background:rgba(124,58,237,.1);color:var(--bb-primary)}
+.bb-act-btn.confirmar:hover{background:rgba(124,58,237,.18)}
+.bb-act-btn.concluir{background:rgba(16,185,129,.1);color:#047857}
+.bb-act-btn.concluir:hover{background:rgba(16,185,129,.2)}
+.bb-act-btn.cancelar{background:rgba(239,68,68,.08);color:var(--bb-danger)}
+.bb-act-btn.cancelar:hover{background:rgba(239,68,68,.15)}
+.bb-act-btn.wpp{background:#25d366;color:#fff;flex:none;padding:10px 14px}
+.bb-act-btn.wpp:hover{background:#128c4e}
+
+/* SECTION TITLE */
+.bb-section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a1a1aa;margin:16px 0 8px}
+
+/* MODAL */
+.bb-modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center}
+.bb-modal{background:#fff;border-radius:22px 22px 0 0;width:100%;max-width:520px;padding:24px 22px 36px;animation:slideUp .22s ease}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.bb-modal h3{font-size:1rem;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.bb-modal h3 i{color:var(--bb-primary)}
+.bb-modal-sub{font-size:.82rem;color:#71717a;margin-bottom:20px}
+.bb-modal-close{float:right;background:none;border:none;font-size:1.1rem;color:#a1a1aa;cursor:pointer;padding:2px 6px}
+
+/* PAGAMENTO GRID */
+.bb-pag-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.bb-pag-opt{padding:14px 10px;border-radius:12px;border:2px solid #e4e4e7;text-align:center;cursor:pointer;transition:all .2s;font-size:.85rem;font-weight:600;color:#52525b}
+.bb-pag-opt i{font-size:1.4rem;display:block;margin-bottom:6px;color:#a1a1aa}
+.bb-pag-opt.sel{border-color:var(--bb-primary);background:rgba(124,58,237,.06);color:var(--bb-primary)}
+.bb-pag-opt.sel i{color:var(--bb-primary)}
+.bb-pag-opt:hover{border-color:#c4b5fd}
+
+/* CANCEL MODAL */
+.bb-cancel-reason{width:100%;border:1.5px solid #e4e4e7;border-radius:10px;padding:10px 14px;font-size:.9rem;font-family:inherit;margin-bottom:16px;resize:none;outline:none}
+.bb-cancel-reason:focus{border-color:var(--bb-primary)}
+
+/* CONFIRM MODAL (after action) */
+.bb-action-done{text-align:center;padding:8px 0 4px}
+.bb-action-done i{font-size:2.8rem;display:block;margin-bottom:10px}
+.bb-action-done strong{font-size:1.05rem;display:block;margin-bottom:4px}
+.bb-action-done p{font-size:.85rem;color:#71717a;margin-bottom:20px}
+.bb-wpp-confirm-btn{width:100%;padding:14px;border-radius:12px;background:#25d366;color:#fff;border:none;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
+.bb-skip-btn{width:100%;padding:12px;border-radius:12px;border:1.5px solid #e4e4e7;background:transparent;font-size:.88rem;font-weight:600;cursor:pointer;color:#71717a}
+
+/* PUSH BUTTON */
+.bb-push-btn{width:38px;height:38px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;flex-shrink:0}
+.bb-push-btn.off{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.45)}
+.bb-push-btn.off:hover{background:rgba(255,255,255,.15);color:rgba(255,255,255,.8)}
+.bb-push-btn.on{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:#fbbf24}
+.bb-push-btn.on:hover{background:rgba(251,191,36,.25)}
+.bb-push-btn.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="bb-header">
+    <div class="bb-header-top">
+        <div class="bb-hdr-avatar" id="avatarEl">
+            {% if b.get('foto') %}
+                <img src="{{ url_for('static', filename=b.foto) }}" alt="">
+            {% else %}
+                {{ b.nome[0]|upper }}
+            {% endif %}
+        </div>
+        <div class="bb-hdr-info">
+            <strong>{{ b.nome }}</strong>
+            <small>{{ b.especialidade or 'Barbeiro' }}  {{ barbearia_nome }}</small>
+        </div>
+        <a href="{{ url_for('barbeiro_config') }}" class="bb-hdr-cfg" title="Configurações">
+            <i class="fa-solid fa-gear"></i>
+        </a>
+        <button class="bb-push-btn off" id="pushBtn" onclick="togglePush()" title="Notificações push">
+            <i class="fa-solid fa-bell" id="pushIcon"></i>
+        </button>
+    </div>
+
+    <!-- Status toggle -->
+    <button class="bb-status-btn {% if b.em_atendimento %}atendendo{% else %}disponivel{% endif %}"
+            id="statusBtn" onclick="toggleStatus()">
+        <div class="bb-status-dot"></div>
+        <span id="statusTxt">{% if b.em_atendimento %}EM ATENDIMENTO  toque para liberar{% else %}DISPONÍVEL  toque para iniciar atendimento{% endif %}</span>
+    </button>
+
+    <!-- Tabs -->
+    <div class="bb-tabs">
+        <div class="bb-tab active" onclick="mostrarTab('hoje', this)" id="tab-hoje">
+            Hoje <span style="opacity:.6;font-size:.72rem">({{ ag_hoje|length }})</span>
+        </div>
+        <div class="bb-tab" onclick="mostrarTab('semana', this)" id="tab-semana">
+            Semana <span style="opacity:.6;font-size:.72rem">({{ ag_semana|length }})</span>
+        </div>
+        <div class="bb-tab" onclick="mostrarTab('mes', this)" id="tab-mes">
+            Mês <span style="opacity:.6;font-size:.72rem">({{ ag_mes|length }})</span>
+        </div>
+    </div>
+</div>
+
+<!--  MACRO: card de agendamento  -->
+{% macro render_card(a, show_data=False) %}
+<div class="bb-card status-{{ a.status|lower }}" id="card-{{ a.id }}">
+    <div class="bb-card-head">
+        <div>
+            <div class="bb-card-hora">{{ a.hora }}</div>
+            {% if show_data %}<div class="bb-card-data">{{ a.data }}</div>{% endif %}
+        </div>
+        <div class="bb-card-cli">
+            <strong>{{ a.cliente }}</strong>
+            <span>{{ a.servico }}</span>
+        </div>
+        <span class="bb-card-badge badge-{{ a.status|lower }}">{{ a.status }}</span>
+    </div>
+    <div class="bb-card-servico">
+        <i class="fa-solid fa-scissors"></i>
+        {{ a.servico }} &middot; {{ a.duracao }} min
+        <span class="bb-card-preco">R$ {{ a.preco }}</span>
+    </div>
+    <div class="bb-card-tel">
+        <i class="fa-solid fa-phone"></i>
+        {{ a.telefone or '—' }}
+        {% if a.telefone %}
+        &nbsp;&middot;&nbsp;
+        <a href="https://wa.me/55{{ a.telefone|replace('(','') |replace(')','') |replace(' ','') |replace('-','') }}" target="_blank">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </a>
+        {% endif %}
+        {% if a.pagamento %}
+        &nbsp;&middot;&nbsp; <i class="fa-solid fa-credit-card"></i> {{ a.pagamento }}
+        {% endif %}
+    </div>
+    {% if a.status not in ['Concluido', 'Cancelado'] %}
+    <div class="bb-card-actions">
+        {% if a.status == 'Pendente' %}
+        <button class="bb-act-btn confirmar" onclick="abrirConfirmar({{ a.id }})">
+            <i class="fa-solid fa-calendar-check"></i> Confirmar
+        </button>
+        {% endif %}
+        {% if a.status == 'Confirmado' %}
+        <button class="bb-act-btn concluir" onclick="abrirConcluir({{ a.id }}, '{{ a.cliente }}')">
+            <i class="fa-solid fa-check-double"></i> Concluir + Pag.
+        </button>
+        {% endif %}
+        <button class="bb-act-btn cancelar" onclick="abrirCancelar({{ a.id }}, '{{ a.cliente }}')">
+            <i class="fa-solid fa-xmark"></i> Cancelar
+        </button>
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+<!-- MAIN -->
+<div class="bb-main">
+
+    <!-- Stats strip -->
+    <div class="bb-strip">
+        <div class="bb-strip-item">
+            <div class="bb-strip-num">{{ ag_hoje|length }}</div>
+            <div class="bb-strip-lbl">Hoje</div>
+        </div>
+        <div class="bb-strip-item">
+            <div class="bb-strip-num" style="color:var(--bb-success)">R${{ receita_hoje }}</div>
+            <div class="bb-strip-lbl">Receita hoje</div>
+        </div>
+        <div class="bb-strip-item">
+            <div class="bb-strip-num" style="color:var(--bb-accent-dark,#d97706)">R${{ receita_mes }}</div>
+            <div class="bb-strip-lbl">No mês</div>
+        </div>
+    </div>
+
+    <!-- TAB HOJE -->
+    <div id="pane-hoje">
+        <div class="bb-section-title">{{ hoje_fmt }}</div>
+        {% if ag_hoje %}
+            {% for a in ag_hoje %}
+            {{ render_card(a, show_data=False) }}
+            {% endfor %}
+        {% else %}
+        <div class="bb-empty">
+            <i class="fa-solid fa-calendar-xmark"></i>
+            <p>Nenhum agendamento hoje</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- TAB SEMANA -->
+    <div id="pane-semana" style="display:none">
+        <div class="bb-section-title">Próximos 7 dias</div>
+        {% if ag_semana %}
+            {% for a in ag_semana %}
+            {{ render_card(a, show_data=True) }}
+            {% endfor %}
+        {% else %}
+        <div class="bb-empty">
+            <i class="fa-solid fa-calendar-days"></i>
+            <p>Nenhum agendamento esta semana</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- TAB MÊS -->
+    <div id="pane-mes" style="display:none">
+        <div class="bb-section-title">Este mês</div>
+        {% if ag_mes %}
+            {% for a in ag_mes %}
+            {{ render_card(a, show_data=True) }}
+            {% endfor %}
+        {% else %}
+        <div class="bb-empty">
+            <i class="fa-solid fa-calendar"></i>
+            <p>Nenhum agendamento este mês</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Espaço para barra inferior -->
+    <div style="height:20px"></div>
+</div>
+
+<!--  MODAL: confirmar agendamento  -->
+<div class="bb-modal-bg" id="modalConfirmar" style="display:none" onclick="if(event.target===this)fecharModais()">
+    <div class="bb-modal">
+        <button class="bb-modal-close" onclick="fecharModais()"><i class="fa-solid fa-xmark"></i></button>
+        <h3><i class="fa-solid fa-calendar-check"></i> Confirmar Agendamento</h3>
+        <p class="bb-modal-sub" id="modalConfNome">Cliente</p>
+        <p style="font-size:.82rem;font-weight:600;color:#52525b;margin-bottom:12px">O cliente será notificado novamente pelo WhatsApp.</p>
+        <div style="display:flex;gap:10px">
+            <button class="bb-act-btn cancelar" style="flex:none;padding:12px 18px" onclick="fecharModais()">Voltar</button>
+            <button class="bb-act-btn confirmar" style="flex:1;padding:12px" onclick="doConfirmar()">
+                <i class="fa-solid fa-check"></i> Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!--  MODAL: concluir + pagamento  -->
+<div class="bb-modal-bg" id="modalConcluir" style="display:none" onclick="if(event.target===this)fecharModais()">
+    <div class="bb-modal">
+        <button class="bb-modal-close" onclick="fecharModais()"><i class="fa-solid fa-xmark"></i></button>
+        <h3><i class="fa-solid fa-brazilian-real-sign"></i> Forma de Pagamento</h3>
+        <p class="bb-modal-sub" id="modalConcNome">Selecione como o cliente pagou</p>
+        <div class="bb-pag-grid" id="pagGrid">
+            <div class="bb-pag-opt" onclick="selecionarPag(this,'Pix')">
+                <i class="fa-brands fa-pix"></i>Pix
+            </div>
+            <div class="bb-pag-opt" onclick="selecionarPag(this,'Cartão Crédito')">
+                <i class="fa-solid fa-credit-card"></i>Cartão Crédito
+            </div>
+            <div class="bb-pag-opt" onclick="selecionarPag(this,'Cartão Débito')">
+                <i class="fa-solid fa-credit-card"></i>Cartão Débito
+            </div>
+            <div class="bb-pag-opt" onclick="selecionarPag(this,'Dinheiro')">
+                <i class="fa-solid fa-money-bill-wave"></i>Dinheiro
+            </div>
+        </div>
+        <button class="bb-act-btn concluir" style="width:100%;padding:14px;font-size:.9rem" onclick="doConcluir()" id="btnDoConcluir" disabled>
+            <i class="fa-solid fa-check-double"></i> Confirmar Conclusão
+        </button>
+    </div>
+</div>
+
+<!--  MODAL: cancelar  -->
+<div class="bb-modal-bg" id="modalCancelar" style="display:none" onclick="if(event.target===this)fecharModais()">
+    <div class="bb-modal">
+        <button class="bb-modal-close" onclick="fecharModais()"><i class="fa-solid fa-xmark"></i></button>
+        <h3><i class="fa-solid fa-xmark"></i> Cancelar Agendamento</h3>
+        <p class="bb-modal-sub" id="modalCancNome">O cliente será notificado pelo WhatsApp.</p>
+        <textarea class="bb-cancel-reason" id="cancelMotivo" rows="3" placeholder="Motivo do cancelamento (opcional)"></textarea>
+        <div style="display:flex;gap:10px">
+            <button class="bb-act-btn confirmar" style="flex:none;padding:12px 18px" onclick="fecharModais()">Voltar</button>
+            <button class="bb-act-btn cancelar" style="flex:1;padding:12px" onclick="doCancelar()">
+                <i class="fa-solid fa-trash"></i> Confirmar Cancelamento
+            </button>
+        </div>
+    </div>
+</div>
+
+<!--  MODAL: resultado da ação  -->
+<div class="bb-modal-bg" id="modalResultado" style="display:none" onclick="if(event.target===this)fecharTudo()">
+    <div class="bb-modal">
+        <div class="bb-action-done">
+            <i id="resultIcon"></i>
+            <strong id="resultTitulo"></strong>
+            <p id="resultSub"></p>
+            <button class="bb-wpp-confirm-btn" id="resultWppBtn" onclick="abrirWpp()" style="display:none">
+                <i class="fa-brands fa-whatsapp"></i> Avisar cliente pelo WhatsApp
+            </button>
+            <button class="bb-skip-btn" onclick="fecharTudo()">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+var _id = null, _pag = null, _wpp = null;
+
+/*  TABS  */
+function mostrarTab(nome, el) {
+    ['hoje','semana','mes'].forEach(t => {
+        document.getElementById('pane-' + t).style.display = t === nome ? '' : 'none';
+        document.getElementById('tab-' + t).classList.toggle('active', t === nome);
+    });
+}
+
+/*  STATUS  */
+function toggleStatus() {
+    fetch('{{ url_for("barbeiro_toggle_status") }}', {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .then(r => r.json()).then(d => {
+        const btn = document.getElementById('statusBtn');
+        const txt = document.getElementById('statusTxt');
+        if(d.em_atendimento) {
+            btn.className = 'bb-status-btn atendendo';
+            txt.textContent = 'EM ATENDIMENTO  toque para liberar';
+        } else {
+            btn.className = 'bb-status-btn disponivel';
+            txt.textContent = 'DISPONÍVEL  toque para iniciar atendimento';
+        }
+    });
+}
+
+/*  MODAIS  */
+function fecharModais() {
+    ['modalConfirmar','modalConcluir','modalCancelar'].forEach(m=>document.getElementById(m).style.display='none');
+}
+function fecharTudo() {
+    fecharModais();
+    document.getElementById('modalResultado').style.display='none';
+    location.reload();
+}
+
+function abrirConfirmar(id) {
+    _id = id;
+    const card = document.getElementById('card-'+id);
+    const cli = card.querySelector('.bb-card-cli strong').textContent;
+    document.getElementById('modalConfNome').textContent = cli;
+    document.getElementById('modalConfirmar').style.display = 'flex';
+}
+function abrirConcluir(id, cli) {
+    _id = id; _pag = null;
+    document.getElementById('modalConcNome').textContent = cli + '  selecione como pagou:';
+    document.querySelectorAll('.bb-pag-opt').forEach(o => o.classList.remove('sel'));
+    document.getElementById('btnDoConcluir').disabled = true;
+    document.getElementById('modalConcluir').style.display = 'flex';
+}
+function abrirCancelar(id, cli) {
+    _id = id;
+    document.getElementById('modalCancNome').textContent = 'Cancelar agendamento de ' + cli + '. O cliente será notificado pelo WhatsApp.';
+    document.getElementById('cancelMotivo').value = '';
+    document.getElementById('modalCancelar').style.display = 'flex';
+}
+
+function selecionarPag(el, pag) {
+    document.querySelectorAll('.bb-pag-opt').forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+    _pag = pag;
+    document.getElementById('btnDoConcluir').disabled = false;
+}
+
+/*  ACTIONS  */
+function postForm(url, data) {
+    const fd = new FormData();
+    for(let k in data) fd.append(k, data[k]);
+    return fetch(url, {method:'POST', body:fd, headers:{'X-Requested-With':'XMLHttpRequest'}}).then(r=>r.json());
+}
+
+function doConfirmar() {
+    fecharModais();
+    postForm(`/barbeiro/iniciar/${_id}`, {}).then(d => {
+        if(d.ok) {
+            _wpp = d.wpp;
+            mostrarResultado('fa-circle-check','#10b981','Agendamento confirmado!','O cliente será avisado.');
+        }
+    });
+}
+
+function doConcluir() {
+    if(!_pag) return;
+    fecharModais();
+    postForm(`/barbeiro/confirmar/${_id}`, {pagamento: _pag}).then(d => {
+        if(d.ok) {
+            _wpp = d.wpp;
+            mostrarResultado('fa-circle-check','#10b981','Atendimento concluído!','Pagamento: ' + d.pagamento);
+        }
+    });
+}
+
+function doCancelar() {
+    const motivo = document.getElementById('cancelMotivo').value;
+    fecharModais();
+    postForm(`/barbeiro/cancelar/${_id}`, {motivo}).then(d => {
+        if(d.ok) {
+            _wpp = d.wpp;
+            mostrarResultado('fa-circle-xmark','#ef4444','Agendamento cancelado','O cliente será notificado.');
+        }
+    });
+}
+
+function mostrarResultado(ico, cor, titulo, sub) {
+    document.getElementById('resultIcon').className = 'fa-solid ' + ico;
+    document.getElementById('resultIcon').style.color = cor;
+    document.getElementById('resultTitulo').textContent = titulo;
+    document.getElementById('resultSub').textContent = sub;
+    const wppBtn = document.getElementById('resultWppBtn');
+    wppBtn.style.display = _wpp ? 'flex' : 'none';
+    document.getElementById('modalResultado').style.display = 'flex';
+}
+
+function abrirWpp() {
+    if(_wpp) window.open(_wpp, '_blank');
+    fecharTudo();
+}
+
+/* ─── WEB PUSH ─────────────────────────────────────────────── */
+var _pushRegistered = false;
+
+async function togglePush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        alert('Notificações push não são suportadas neste navegador/dispositivo.');
+        return;
+    }
+    const btn = document.getElementById('pushBtn');
+    if (_pushRegistered) {
+        // já ativo — ao clicar novamente, apenas informa que está ativo
+        showPushToast('Notificações já estão ativas!');
+        return;
+    }
+    try {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+            setPushState('err');
+            showPushToast('Permissão negada. Ative nas configurações do navegador.');
+            return;
+        }
+        const reg = await navigator.serviceWorker.register('/static/js/sw.js', { scope: '/' });
+        await navigator.serviceWorker.ready;
+        const keyResp = await fetch('/api/vapid-key');
+        const keyData = await keyResp.json();
+        if (!keyData.public_key) throw new Error('VAPID key não disponível');
+        const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlB64ToUint8(keyData.public_key)
+        });
+        const resp = await fetch('/barbeiro/push-registrar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(sub.toJSON())
+        });
+        const result = await resp.json();
+        if (result.ok) {
+            _pushRegistered = true;
+            setPushState('on');
+            showPushToast('Notificações ativadas! Você receberá alertas de novos agendamentos.');
+        }
+    } catch(e) {
+        console.error('Push error:', e);
+        setPushState('err');
+        showPushToast('Não foi possível ativar as notificações.');
+    }
+}
+
+function setPushState(state) {
+    const btn = document.getElementById('pushBtn');
+    const ico = document.getElementById('pushIcon');
+    btn.className = 'bb-push-btn ' + state;
+    ico.className = state === 'on' ? 'fa-solid fa-bell' : state === 'err' ? 'fa-solid fa-bell-slash' : 'fa-regular fa-bell';
+}
+
+function urlB64ToUint8(b64) {
+    const pad = '='.repeat((4 - b64.length % 4) % 4);
+    const raw = atob((b64 + pad).replace(/-/g,'+').replace(/_/g,'/'));
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+function showPushToast(msg) {
+    let t = document.getElementById('pushToast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'pushToast';
+        t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1230;color:#fff;padding:11px 20px;border-radius:12px;font-size:.83rem;font-weight:600;z-index:999;max-width:300px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:opacity .3s';
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
+}
+
+// Verificar se já tem subscription ativa ao carregar
+(async function checkPushState() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    try {
+        const reg = await navigator.serviceWorker.getRegistration('/static/js/sw.js');
+        if (!reg) return;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) { _pushRegistered = true; setPushState('on'); }
+    } catch(e) {}
+})();
+</script>
+</body>
+</html>

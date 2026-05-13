@@ -1,0 +1,30 @@
+{% extends 'base_admin.html' %}
+{% block title %}Perfil · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-user-circle" style="color:var(--bb-primary);margin-right:8px"></i>Meu Perfil{% endblock %}
+
+{% block content %}
+<div class="adm-card" style="max-width:560px">
+    <div style="padding:32px;text-align:center;border-bottom:1px solid var(--bb-border)">
+        <div class="adm-user-avatar" style="width:80px;height:80px;border-radius:22px;font-size:1.8rem;margin:0 auto 14px">
+            {{ session.get('nome','U')[0]|upper }}
+        </div>
+        <div style="font-size:1.2rem;font-weight:800">{{ session.get('nome','—') }}</div>
+        <div style="color:var(--bb-text-sec);font-size:.9rem;margin-top:4px">
+            {{ 'Administrador' if session.get('role')=='admin' else ('Gerente' if session.get('role')=='gerente' else 'Barbeiro') }}
+        </div>
+    </div>
+    <div class="adm-modal-body">
+        <form method="POST" action="{{ url_for('salvar_perfil') }}">
+            <div class="adm-form-row">
+                <div class="adm-form-group"><label>Nome</label><input type="text" name="nome" value="{{ session.get('nome','') }}" required></div>
+                <div class="adm-form-group"><label>Usuário</label><input type="text" name="usuario" value="{{ session.get('usuario','') }}" required></div>
+                <div class="adm-form-group"><label>Nova Senha</label><input type="password" name="nova_senha" placeholder="Deixe em branco para manter"></div>
+                <div class="adm-form-group"><label>Confirmar Senha</label><input type="password" name="confirmar" placeholder="Repita a nova senha"></div>
+            </div>
+            <div style="text-align:right;margin-top:8px">
+                <button type="submit" class="adm-btn primary"><i class="fa-solid fa-floppy-disk"></i> Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

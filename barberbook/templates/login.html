@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberBook PRO – Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="bb-login-page">
+    <div class="bb-login-card">
+        <div class="bb-login-brand">
+            <div class="bb-login-logo"><i class="fa-solid fa-scissors" style="color:#fff"></i></div>
+            <div class="bb-login-title">BarberBook</div>
+        </div>
+        <p class="bb-login-sub">Painel de Gestão · PRO</p>
+
+        {% if error %}
+        <div class="bb-login-error" style="display:flex;align-items:center;gap:8px">
+            <i class="fa-solid fa-circle-xmark"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="bb-login-error" style="display:flex;align-items:center;gap:8px;background:{% if category=='success' %}rgba(16,185,129,.12){% else %}rgba(239,68,68,.1){% endif %};color:{% if category=='success' %}#6ee7b7{% else %}#fca5a5{% endif %}">
+                <i class="fa-solid {% if category=='success' %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}" class="bb-login-form">
+            <label for="usuario">Usuário</label>
+            <input type="text" id="usuario" name="usuario" placeholder="seu.usuario" autocomplete="username" required>
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="••••••••" autocomplete="current-password" required>
+            <button type="submit" class="bb-login-btn">
+                <i class="fa-solid fa-right-to-bracket" style="margin-right:8px"></i> Entrar
+            </button>
+        </form>
+
+        <div style="text-align:center;margin-bottom:16px">
+            <a href="{{ url_for('landing') }}" style="color:#a78bfa;font-size:.82rem;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+                <i class="fa-solid fa-arrow-left fa-xs"></i> Voltar ao site
+            </a>
+        </div>
+
+        <div class="bb-login-roles">
+            <p><i class="fa-solid fa-shield-halved" style="margin-right:4px"></i>Acesso por perfil</p>
+            <div class="bb-login-tags">
+                <span class="bb-login-tag"><i class="fa-solid fa-crown" style="font-size:.7rem"></i> Administrador</span>
+                <span class="bb-login-tag"><i class="fa-solid fa-chart-pie" style="font-size:.7rem"></i> Gerente</span>
+                <span class="bb-login-tag"><i class="fa-solid fa-scissors" style="font-size:.7rem"></i> Barbeiro</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

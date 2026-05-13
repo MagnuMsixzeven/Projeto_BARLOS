@@ -1,0 +1,76 @@
+{% extends 'base_admin.html' %}
+{% block title %}Serviços · BarberBook PRO{% endblock %}
+{% block page_title %}<i class="fa-solid fa-star" style="color:var(--bb-primary);margin-right:8px"></i>Serviços{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div>
+        <h1 style="font-size:1.3rem;font-weight:800">Serviços</h1>
+        <p style="color:var(--bb-text-sec);font-size:.88rem">{{ servicos|length }} serviços cadastrados</p>
+    </div>
+    <button onclick="document.getElementById('modalServico').style.display='flex'" class="adm-btn primary">
+        <i class="fa-solid fa-plus"></i> Novo Serviço
+    </button>
+</div>
+
+<div class="adm-card">
+    <div class="adm-table-wrap">
+        <table class="adm-table">
+            <thead>
+                <tr><th>Serviço</th><th>Descrição</th><th>Duração</th><th>Preço</th><th>Status</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+            {% for s in servicos %}
+            <tr>
+                <td>
+                    <div class="adm-name-cell">
+                        <div class="adm-mini-avatar" style="font-size:.75rem"><i class="fa-solid fa-scissors"></i></div>
+                        <strong>{{ s.nome }}</strong>
+                    </div>
+                </td>
+                <td style="color:var(--bb-text-sec);font-size:.85rem">{{ s.descricao or '—' }}</td>
+                <td>{{ s.duracao }} min</td>
+                <td style="font-weight:700;color:var(--bb-success)">R$ {{ s.preco }}</td>
+                <td><span class="adm-badge {% if s.ativo %}bg-success{% else %}bg-muted{% endif %}">{{ 'Ativo' if s.ativo else 'Inativo' }}</span></td>
+                <td>
+                    <div class="adm-actions">
+                        <a href="{{ url_for('editar_servico', id=s.id) }}" class="adm-btn-icon primary"><i class="fa-solid fa-pen"></i></a>
+                        <form method="POST" action="{{ url_for('deletar_servico', id=s.id) }}" style="display:inline" onsubmit="return confirm('Excluir serviço?')">
+                            <button type="submit" class="adm-btn-icon danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--bb-text-sec)">Nenhum serviço cadastrado</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal novo serviço -->
+<div class="adm-modal-overlay" id="modalServico" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+    <div class="adm-modal">
+        <div class="adm-modal-header">
+            <h3><i class="fa-solid fa-plus"></i> Novo Serviço</h3>
+            <button class="adm-modal-close" onclick="document.getElementById('modalServico').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form method="POST" action="{{ url_for('novo_servico') }}">
+        <div class="adm-modal-body">
+            <div class="adm-form-row">
+                <div class="adm-form-group"><label>Nome *</label><input type="text" name="nome" required placeholder="Ex: Corte + Barba"></div>
+                <div class="adm-form-group"><label>Preço (R$) *</label><input type="number" name="preco" step="0.01" min="0" required placeholder="35,00"></div>
+                <div class="adm-form-group"><label>Duração (min) *</label><input type="number" name="duracao" min="5" required placeholder="45"></div>
+                <div class="adm-form-group"><label>Status</label><select name="ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
+                <div class="adm-form-group adm-form-full"><label>Descrição</label><textarea name="descricao" rows="2" placeholder="Descrição do serviço…"></textarea></div>
+            </div>
+        </div>
+        <div class="adm-modal-footer">
+            <button type="button" class="adm-btn ghost" onclick="document.getElementById('modalServico').style.display='none'">Cancelar</button>
+            <button type="submit" class="adm-btn primary"><i class="fa-solid fa-check"></i> Salvar</button>
+        </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
