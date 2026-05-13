@@ -1,1 +1,7 @@
 ﻿flask>=3.0
+gunicorn
+openpyxl
+requests
+pywebpush
+py-vapid
+cryptography
